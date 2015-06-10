@@ -50,6 +50,7 @@ const static struct rgw_http_errors RGW_HTTP_ERRORS[] = {
     { ERR_METHOD_NOT_ALLOWED, 405, "MethodNotAllowed" },
     { ETIMEDOUT, 408, "RequestTimeout" },
     { EEXIST, 409, "BucketAlreadyExists" },
+    { ERR_BUCKET_ALREADY_OWNED, 409, "BucketAlreadyOwnedByYou" },
     { ENOTEMPTY, 409, "BucketNotEmpty" },
     { ERR_PRECONDITION_FAILED, 412, "PreconditionFailed" },
     { ERANGE, 416, "InvalidRange" },
