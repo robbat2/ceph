@@ -1028,7 +1028,7 @@ OPTION(rgw_get_obj_max_req_size, OPT_INT, 4 << 20) // max length of a single get
  *
  * Setting as 2 : further restricts name so as to follow AWS S3 bucket naming conventions for non-standard regions.
  */
-OPTION(rgw_s3_bucket_name_create_strictness, OPT_INT, 1)
+OPTION(rgw_s3_bucket_name_create_strictness, OPT_INT, 2)
 
 OPTION(rgw_s3_bucket_name_access_strictness, OPT_INT, 1) // option for bucket access. Values similar to above option for creation
 

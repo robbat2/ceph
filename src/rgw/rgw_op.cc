@@ -1296,6 +1296,53 @@ static int forward_request_to_master(struct req_state *s, obj_version *objv, RGW
   return 0;
 }
 
+int RGWCreateBucket::validate_bucket_name_before_creation(const string& bucket, int name_strictness_option) {
+	int len = bucket.size();
+	switch (name_strictness_option) {
+		case 1:
+			if (!(isalpha(bucket[0]) || isdigit(bucket[0])))
+				return -ERR_INVALID_BUCKET_NAME;
+			break;
+
+		case 2:
+		default :
+			if (len > 63)
+				return -ERR_INVALID_BUCKET_NAME;
+			if (!(isalpha(bucket[len-1]) || isdigit(bucket[len-1])))
+				return -ERR_INVALID_BUCKET_NAME;
+			bool last_char_dot = false; // last character occurred was a '.'
+			bool last_char_hyphen = false; // last character occurred was a '-'
+			for (const char *s = bucket.c_str(); *s; ++s) {
+				char c = *s;
+				// bucket name cannot contain uppercase letters.
+				if (isdigit(c) || (isalpha(c) && islower(c))) {
+					last_char_hyphen = false;
+					last_char_dot = false;
+					continue;
+				}
+				else if (c == '.') {
+					if ((last_char_hyphen || last_char_dot))
+						return -ERR_INVALID_BUCKET_NAME;
+					else {
+						last_char_dot = true;
+						continue;
+					}
+				}
+				else if (c == '-') {
+					if (last_char_dot)
+						return -ERR_INVALID_BUCKET_NAME;
+					else {
+						last_char_hyphen = true;
+						continue;
+					}
+				}
+				else
+					return -ERR_INVALID_BUCKET_NAME;
+			}
+	}
+	return 0;
+}
+
 void RGWCreateBucket::pre_exec()
 {
   rgw_bucket_object_pre_exec(s);
@@ -1394,6 +1441,14 @@ void RGWCreateBucket::execute()
     cors_config.encode(corsbl);
     attrs[RGW_ATTR_CORS] = corsbl;
   }
+
+  //validating bucket name as per creation strictness configuration, before creation
+  if (s->cct->_conf->rgw_s3_bucket_name_create_strictness > s->cct->_conf->rgw_s3_bucket_name_access_strictness) {
+	  ret = validate_bucket_name_before_creation(s->bucket_name_str, s->cct->_conf->rgw_s3_bucket_name_create_strictness);
+	  if (ret < 0)
+		  return;
+  }
+
   s->bucket.name = s->bucket_name_str;
   ret = store->create_bucket(s->user, s->bucket, region_name, placement_rule, attrs, info, pobjv,
                              &ep_objv, creation_time, pmaster_bucket, true);
