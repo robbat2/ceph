@@ -2149,7 +2149,10 @@ static int check_bucket_name_characters_for_relaxed(const string& bucket) {
   	return 0;
 }
 
-static int check_bucket_name_characters_for_DNS(const string& bucket) {
+static int check_bucket_name_characters_for_DNS(const string& bucket, int len) {
+	// bucket name length cannot exceed 63 characters.
+	if (len > 63)
+		return -ERR_INVALID_BUCKET_NAME;
 	// bucket name must start with either letter or number.
 	if (!(isalpha(bucket[0]) || isdigit(bucket[0])))
 		return -ERR_INVALID_BUCKET_NAME;
@@ -2215,11 +2218,8 @@ int RGWHandler_ObjStore_S3::validate_bucket_name(const string& bucket, int name_
   		  break;
 
   	  case 2:
-  		  // bucket name length cannot exceed 63 characters.
-  		  if (len > 63)
-  			  return -ERR_INVALID_BUCKET_NAME;
   		  // check other conditions so as to confirm DNS compliance.
-  		  ret = check_bucket_name_characters_for_DNS(bucket);
+  		  ret = check_bucket_name_characters_for_DNS(bucket, len);
   		  break;
 
   	  default: // default is case 1.
@@ -2240,12 +2240,7 @@ int RGWHandler_ObjStore_S3::init(RGWRados *store, struct req_state *s, RGWClient
 {
   dout(10) << "s->object=" << (!s->object.empty() ? s->object : rgw_obj_key("<NULL>")) << " s->bucket=" << (!s->bucket_name_str.empty() ? s->bucket_name_str : "<NULL>") << dendl;
 
-  int bucket_name_strictness_value;
-  if (s->op == OP_PUT) {
-	  bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_name_create_strictness;
-  } else {
-	  bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_name_access_strictness;
-  }
+  int bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_name_access_strictness;
   int ret = validate_bucket_name(s->bucket_name_str, bucket_name_strictness_value);
   if (ret)
     return ret;

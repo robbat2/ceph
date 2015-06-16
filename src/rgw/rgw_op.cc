@@ -1394,6 +1394,14 @@ void RGWCreateBucket::execute()
     cors_config.encode(corsbl);
     attrs[RGW_ATTR_CORS] = corsbl;
   }
+
+  //validating bucket name as per creation strictness configuration, before creation
+  if (s->cct->_conf->rgw_s3_bucket_name_create_strictness > s->cct->_conf->rgw_s3_bucket_name_access_strictness) {
+	  ret = RGWHandler_ObjStore_S3::validate_bucket_name(s->bucket_name_str, s->cct->_conf->rgw_s3_bucket_name_create_strictness);
+	  if (ret < 0)
+		  return;
+  }
+
   s->bucket.name = s->bucket_name_str;
   ret = store->create_bucket(s->user, s->bucket, region_name, placement_rule, attrs, info, pobjv,
                              &ep_objv, creation_time, pmaster_bucket, true);
