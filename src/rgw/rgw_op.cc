@@ -1482,11 +1482,7 @@ void RGWCreateBucket::execute()
       ldout(s->cct, 0) << "WARNING: failed to unlink bucket: ret=" << ret << dendl;
     }
   } else if (ret == -EEXIST || (ret == 0 && existed)) {
-	  if (info.owner.compare(s->user.user_id) == 0){
-		  ret = -ERR_BUCKET_ALREADY_OWNED;
-	  } else {
-		  ret = -ERR_BUCKET_EXISTS;
-	  }
+		 ret = -ERR_BUCKET_EXISTS;
   }
 }
 
