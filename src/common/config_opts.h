@@ -1025,9 +1025,12 @@ OPTION(rgw_get_obj_max_req_size, OPT_INT, 4 << 20) // max length of a single get
  * RGW Bucket name restriction option. values can be {0,1,2). Default value is 1.
  * Setting value as 0 : enable relaxed bucket name rules for US region buckets.
  * Setting as 1 : name can't start with a non-alphanumeric. rest same as value =1.
+ *
  * Setting as 2 : further restricts name so as to follow AWS S3 bucket naming conventions for non-standard regions.
  */
-OPTION(rgw_s3_bucket_names_stricness, OPT_INT, 1)
+OPTION(rgw_s3_bucket_name_create_strictness, OPT_INT, 1)
+
+OPTION(rgw_s3_bucket_name_access_strictness, OPT_INT, 1) // option for bucket access. Values similar to above option for creation
 
 OPTION(rgw_defer_to_bucket_acls, OPT_STR, "") // if the user has bucket perms, use those before key perms (recurse and full_control)
 OPTION(rgw_list_buckets_max_chunk, OPT_INT, 1000) // max buckets to retrieve in a single op when listing user buckets

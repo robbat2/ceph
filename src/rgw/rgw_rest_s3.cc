@@ -2150,6 +2150,12 @@ static int check_bucket_name_characters_for_relaxed(const string& bucket) {
 }
 
 static int check_bucket_name_characters_for_DNS(const string& bucket) {
+	// bucket name must start with either letter or number.
+	if (!(isalpha(bucket[0]) || isdigit(bucket[0])))
+		return -ERR_INVALID_BUCKET_NAME;
+	// bucket name must end with either letter or number.
+	if (!(isalpha(bucket[len-1]) || isdigit(bucket[len-1])))
+		return -ERR_INVALID_BUCKET_NAME;
 	// bucket name cannot contain a sequence of ".-" , ".." or "-."
 	bool last_char_dot = false; // last character occurred was a '.'
 	bool last_char_hyphen = false; // last character occurred was a '-'
@@ -2212,12 +2218,6 @@ int RGWHandler_ObjStore_S3::validate_bucket_name(const string& bucket, int name_
   		  // bucket name length cannot exceed 63 characters.
   		  if (len > 63)
   			  return -ERR_INVALID_BUCKET_NAME;
-  		  // bucket name must start with either letter or number.
-  		  if (!(isalpha(bucket[0]) || isdigit(bucket[0])))
-  			  return -ERR_INVALID_BUCKET_NAME;
-  		  // bucket name must end with either letter or number.
-  		  if (!(isalpha(bucket[len-1]) || isdigit(bucket[len-1])))
-  			  return -ERR_INVALID_BUCKET_NAME;
   		  // check other conditions so as to confirm DNS compliance.
   		  ret = check_bucket_name_characters_for_DNS(bucket);
   		  break;
@@ -2240,7 +2240,12 @@ int RGWHandler_ObjStore_S3::init(RGWRados *store, struct req_state *s, RGWClient
 {
   dout(10) << "s->object=" << (!s->object.empty() ? s->object : rgw_obj_key("<NULL>")) << " s->bucket=" << (!s->bucket_name_str.empty() ? s->bucket_name_str : "<NULL>") << dendl;
 
-  int bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_names_stricness;
+  int bucket_name_strictness_value;
+  if (s->op == OP_PUT) {
+	  bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_name_create_strictness;
+  } else {
+	  bucket_name_strictness_value = s->cct->_conf->rgw_s3_bucket_name_access_strictness;
+  }
   int ret = validate_bucket_name(s->bucket_name_str, bucket_name_strictness_value);
   if (ret)
     return ret;
