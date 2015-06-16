@@ -1482,7 +1482,7 @@ void RGWCreateBucket::execute()
       ldout(s->cct, 0) << "WARNING: failed to unlink bucket: ret=" << ret << dendl;
     }
   } else if (ret == -EEXIST || (ret == 0 && existed)) {
-		 ret = -ERR_BUCKET_EXISTS;
+	  ret = -ERR_BUCKET_EXISTS;
   }
 }
 
