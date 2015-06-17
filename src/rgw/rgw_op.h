@@ -374,7 +374,6 @@ public:
   RGWCreateBucket() : ret(0), has_cors(false) {}
 
   int verify_permission();
-  int validate_bucket_name_before_creation(const string& bucket, int name_strictness_option);
   void pre_exec();
   void execute();
   virtual void init(RGWRados *store, struct req_state *s, RGWHandler *h) {
