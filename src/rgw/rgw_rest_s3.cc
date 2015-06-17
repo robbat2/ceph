@@ -2195,7 +2195,7 @@ static int check_bucket_name_characters_for_DNS(const string& bucket, int len) {
 
 int RGWHandler_ObjStore_S3::validate_bucket_name(const string& bucket, int name_strictness)
 {
-  int ret = RGWHandler_ObjStore::validate_bucket_name(bucket);
+  int ret = RGWHandler_ObjStore::validate_bucket_name(bucket, name_strictness);
   if (ret < 0)
     return ret;
 
