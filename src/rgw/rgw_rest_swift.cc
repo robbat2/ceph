@@ -903,7 +903,7 @@ int RGWHandler_ObjStore_SWIFT::authorize()
   return 0;
 }
 
-int RGWHandler_ObjStore_SWIFT::validate_bucket_name(const string& bucket)
+int RGWHandler_ObjStore_SWIFT::validate_bucket_name(const string& bucket, int name_strictness)
 {
   int strictness_option = s->cct->_conf->rgw_s3_bucket_name_access_strictness;
   int ret = RGWHandler_ObjStore::validate_bucket_name(bucket, strictness_option);
